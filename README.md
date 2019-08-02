@@ -11,6 +11,7 @@ A golang library that implements application/problem+json
 
 * compatible with application/problem+json
 * inspired by https://github.com/zalando/problem
+* RFC link https://tools.ietf.org/html/rfc7807
 
 ## Usage
 
