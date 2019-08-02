@@ -48,6 +48,6 @@ To write the Problem directly to a http.ResponseWriter:
 
 ```go
 http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p.New(problem.Type("https://example.com/404"), problem.Status(404)).ToWriter(w)
+		problem.New(problem.Type("https://example.com/404"), problem.Status(404)).ToWriter(w)
 	})
 ```
