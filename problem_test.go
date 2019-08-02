@@ -44,6 +44,10 @@ func TestProblem(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
+	if res.StatusCode != http.StatusNotFound {
+		t.Fatalf("unexpected statuscode: %d expected 404", res.StatusCode)
+	}
+
 	if string(bodyBytes) != `{"detail":"some more details","instance":"https://example.com/details","status":404,"title":"titlestring","type":"https://example.com/404","x":"value"}` {
 		t.Fatalf("unexpected reply: %s", bodyBytes)
 	}
