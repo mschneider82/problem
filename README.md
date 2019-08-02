@@ -48,6 +48,12 @@ To write the Problem directly to a http.ResponseWriter:
 
 ```go
 http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		problem.New(problem.Type("https://example.com/404"), problem.Status(404)).ToWriter(w)
-	})
+    problem.New(problem.Type("https://example.com/404"), problem.Status(404)).ToWriter(w)
+  })
+```
+
+If you are using gin you can simply reply the problem to the client:
+```go
+// c is *gin.Context
+problem.New(problem.Title("houston! we have a problem"), problem.Status(http.StatusNotFound)).ToWriter(c.Writer)
 ```
