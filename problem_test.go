@@ -22,10 +22,11 @@ func TestProblem(t *testing.T) {
 		t.Fatalf("unexpected reply: %s", str)
 	}
 
-	p.Append(problem.Detail("some more details"))
+	p.Append(problem.Detail("some more details"), problem.Instance("https://example.com/details"))
 	str = p.JSONString()
-	if str != `{"detail":"some more details","status":404,"title":"titlestring","x":"value"}` {
-		t.Fatalf("unexpected reply: %s", str)
+	expected := `{"detail":"some more details","instance":"https://example.com/details","status":404,"title":"titlestring","x":"value"}`
+	if str != expected {
+		t.Fatalf("unexpected reply: \ngot: %s\nexpected: %s", str, expected)
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +44,7 @@ func TestProblem(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
-	if string(bodyBytes) != `{"detail":"some more details","status":404,"title":"titlestring","type":"https://example.com/404","x":"value"}` {
+	if string(bodyBytes) != `{"detail":"some more details","instance":"https://example.com/details","status":404,"title":"titlestring","type":"https://example.com/404","x":"value"}` {
 		t.Fatalf("unexpected reply: %s", bodyBytes)
 	}
 }
