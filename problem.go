@@ -30,8 +30,8 @@ func (p Problem) JSONString() string {
 	return string(p.JSON())
 }
 
-// ToWriter writes the Problem to a http Response Writer
-func (p Problem) ToWriter(w http.ResponseWriter) (int, error) {
+// WriteTo writes the Problem to a http Response Writer
+func (p Problem) WriteTo(w http.ResponseWriter) (int, error) {
 	w.Header().Set("Content-Type", "application/problem+json")
 	if statuscode, ok := p.data["status"]; ok {
 		if statusint, ok := statuscode.(int); ok {

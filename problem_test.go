@@ -30,7 +30,7 @@ func TestProblem(t *testing.T) {
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p.Append(problem.Type("https://example.com/404")).ToWriter(w)
+		p.Append(problem.Type("https://example.com/404")).WriteTo(w)
 	}))
 	defer ts.Close()
 
