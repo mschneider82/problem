@@ -21,8 +21,13 @@ type Problem struct {
 
 // JSON returns the Problem as json bytes
 func (p Problem) JSON() []byte {
-	b, _ := json.Marshal(&p.data)
+	b, _ := p.MarshalJSON()
 	return b
+}
+
+// MarshalJSON implements the json.Marshaler interface
+func (p Problem) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&p.data)
 }
 
 // JSONString returns the Problem as json string

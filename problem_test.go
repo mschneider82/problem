@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"encoding/json"
+
 	"github.com/mschneider82/problem"
 )
 
@@ -13,6 +15,13 @@ func TestProblem(t *testing.T) {
 	p := problem.New(problem.Title("titlestring"), problem.Custom("x", "value"))
 
 	if p.JSONString() != `{"title":"titlestring","x":"value"}` {
+		t.Fatalf("unexpected reply")
+	}
+	b, err := json.Marshal(p)
+	if err != nil {
+		t.Fatalf("unexpected json marshal is fine: %v", err)
+	}
+	if string(b) != `{"title":"titlestring","x":"value"}` {
 		t.Fatalf("unexpected reply")
 	}
 
@@ -51,4 +60,5 @@ func TestProblem(t *testing.T) {
 	if string(bodyBytes) != `{"detail":"some more details","instance":"https://example.com/details","status":404,"title":"titlestring","type":"https://example.com/404","x":"value"}` {
 		t.Fatalf("unexpected reply: %s", bodyBytes)
 	}
+
 }
