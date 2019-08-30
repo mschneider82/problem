@@ -62,3 +62,16 @@ func TestProblem(t *testing.T) {
 	}
 
 }
+
+func TestMarshalUnmarshal(t *testing.T) {
+	p := problem.New(problem.Status(200), problem.Title("Strange"))
+
+	newProblem := problem.New()
+	err := json.Unmarshal(p.JSON(), &newProblem)
+	if err != nil {
+		t.Fatalf("no error expected in unmarshal")
+	}
+	if p.JSONString() != newProblem.JSONString() {
+		t.Fatalf("expected equal problems, got %s - %s", p.JSONString(), newProblem.JSONString())
+	}
+}
