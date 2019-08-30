@@ -75,15 +75,15 @@ func(c *gin.Context) {
 Create a Problem from an existing error
 
 ```go
-  _, err := ioutil.ReadFile("non-existing")
-  if err != nil {
-    p := problem.New(
-      problem.Wrap(err),
-      problem.Title("Internal Error"),
-      problem.Status(404),
-      )
-    if !errors.Is(p, os.ErrNotExist) {
-      t.Fatalf("expected not existing error")
-    }
+_, err := ioutil.ReadFile("non-existing")
+if err != nil {
+  p := problem.New(
+    problem.Wrap(err),
+    problem.Title("Internal Error"),
+    problem.Status(404),
+    )
+  if !errors.Is(p, os.ErrNotExist) {
+    t.Fatalf("expected not existing error")
   }
+}
 ```
