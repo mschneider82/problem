@@ -5,6 +5,13 @@ import (
 	"net/http"
 )
 
+const (
+	// ContentTypeJSON https://tools.ietf.org/html/rfc7807#section-6.1
+	ContentTypeJSON = "application/problem+json"
+	// ContentTypeXML https://tools.ietf.org/html/rfc7807#section-6.2
+	ContentTypeXML = "application/problem+xml"
+)
+
 // An Option configures a Problem using the functional options paradigm
 // popularized by Rob Pike.
 type Option interface {
@@ -16,7 +23,8 @@ type optionFunc func(*Problem)
 func (f optionFunc) apply(problem *Problem) { f(problem) }
 
 type Problem struct {
-	data map[string]interface{}
+	data   map[string]interface{}
+	reason error
 }
 
 // JSON returns the Problem as json bytes
@@ -40,9 +48,25 @@ func (p Problem) JSONString() string {
 	return string(p.JSON())
 }
 
+// Error implements the error interface, so a Problem can be used as an error
+func (p Problem) Error() string {
+	return p.JSONString()
+}
+
+// Is compares Problem.Error() with err.Error()
+func (p Problem) Is(err error) bool {
+	return p.Error() == err.Error()
+}
+
+// Unwrap returns the result of calling the Unwrap method on err, if err implements Unwrap.
+// Otherwise, Unwrap returns nil.
+func (p Problem) Unwrap() error {
+	return p.reason
+}
+
 // WriteTo writes the Problem to a http Response Writer
 func (p Problem) WriteTo(w http.ResponseWriter) (int, error) {
-	w.Header().Set("Content-Type", "application/problem+json")
+	w.Header().Set("Content-Type", ContentTypeJSON)
 	if statuscode, ok := p.data["status"]; ok {
 		if statusint, ok := statuscode.(int); ok {
 			w.WriteHeader(statusint)
@@ -67,6 +91,14 @@ func (p *Problem) Append(opts ...Option) *Problem {
 		opt.apply(p)
 	}
 	return p
+}
+
+// Wrap an error to the Problem
+func Wrap(err error) Option {
+	return optionFunc(func(problem *Problem) {
+		problem.reason = err
+		problem.data["reason"] = err.Error()
+	})
 }
 
 // Type sets the type URI (typically, with the "http" or "https" scheme) that identifies the problem type.

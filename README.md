@@ -12,6 +12,8 @@ A golang library that implements application/problem+json
 * compatible with application/problem+json
 * inspired by https://github.com/zalando/problem
 * RFC link https://tools.ietf.org/html/rfc7807
+* a Problem implements the Error interface and can be compared with errors.Is()
+* Wrap an error to a Problem
 
 ## Usage
 
@@ -68,4 +70,20 @@ func(c *gin.Context) {
     problem.Status(http.StatusNotFound),
   ).WriteTo(c.Writer)
 }
+```
+
+Creates a Problem from an existing error
+
+```go
+  _, err := ioutil.ReadFile("non-existing")
+  if err != nil {
+    p := problem.New(
+      problem.Wrap(err),
+      problem.Title("Internal Error"),
+      problem.Status(404),
+      )
+    if !errors.Is(p, os.ErrNotExist) {
+      t.Fatalf("expected not existing error")
+    }
+  }
 ```
