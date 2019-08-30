@@ -72,7 +72,7 @@ func(c *gin.Context) {
 }
 ```
 
-Creates a Problem from an existing error
+Create a Problem from an existing error
 
 ```go
   _, err := ioutil.ReadFile("non-existing")
