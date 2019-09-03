@@ -1,6 +1,6 @@
 # problem
 
-[![GoDoc](https://godoc.org/github.com/mschneider82/problem?status.svg)](https://godoc.org/github.com/mschneider82/problem)
+[![GoDoc](https://godoc.org/schneider.vip/problem?status.svg)](https://godoc.org/schneider.vip/problem)
 ![https://github.com/jpoles1/gopherbadger](./coverage_badge.png)
 
 A golang library that implements application/problem+json
@@ -14,6 +14,12 @@ A golang library that implements application/problem+json
 * RFC link https://tools.ietf.org/html/rfc7807
 * a Problem implements the Error interface and can be compared with errors.Is()
 * Wrap an error to a Problem
+
+## Install
+
+```
+go get -u schneider.vip/problem
+```
 
 ## Usage
 

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mschneider82/problem"
+	"schneider.vip/problem"
 )
 
 func TestProblem(t *testing.T) {
