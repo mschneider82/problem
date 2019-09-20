@@ -67,17 +67,6 @@ http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
   })
 ```
 
-If you are using gin you can simply reply the problem to the client:
-
-```go
-func(c *gin.Context) {
-  problem.New(
-    problem.Title("houston! we have a problem"),
-    problem.Status(http.StatusNotFound),
-  ).WriteTo(c.Writer)
-}
-```
-
 Create a Problem from an existing error
 
 ```go
@@ -90,6 +79,37 @@ if err != nil {
     )
   if !errors.Is(p, os.ErrNotExist) {
     t.Fatalf("expected not existing error")
+  }
+}
+```
+
+
+### [Gin](https://github.com/gin-gonic/gin) Framework
+If you are using gin you can simply reply the problem to the client:
+
+```go
+func(c *gin.Context) {
+  problem.New(
+    problem.Title("houston! we have a problem"),
+    problem.Status(http.StatusNotFound),
+  ).WriteTo(c.Writer)
+}
+```
+
+### [Echo]() Framework
+If you are using echo you can use the following error handler to handle Problems and return them to client.
+
+```go
+func ProblemHandler(err error, c echo.Context) {
+  if prb, ok := err.(*problem.Problem); ok {
+    if !c.Response().Committed {
+            if _, err := prb.WriteTo(c.Response().Writer); err != nil {
+                    e.Logger.Error(err)
+            }
+    }
+  } else {
+        # e is an instnace of echo.Echo
+        e.DefaultHTTPErrorHandler(err, c)
   }
 }
 ```
