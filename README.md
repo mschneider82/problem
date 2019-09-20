@@ -96,7 +96,7 @@ func(c *gin.Context) {
 }
 ```
 
-### [Echo]() Framework
+### [Echo](https://github.com/labstack/echo) Framework
 If you are using echo you can use the following error handler to handle Problems and return them to client.
 
 ```go
@@ -108,7 +108,7 @@ func ProblemHandler(err error, c echo.Context) {
             }
     }
   } else {
-        # e is an instnace of echo.Echo
+        // e is an instance of echo.Echo
         e.DefaultHTTPErrorHandler(err, c)
   }
 }
