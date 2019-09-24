@@ -2,6 +2,7 @@ package problem_test
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -65,6 +66,38 @@ func TestProblem(t *testing.T) {
 
 }
 
+func TestXMLProblem(t *testing.T) {
+	p := problem.New(problem.Status(404))
+	xmlstr := p.XMLString()
+	expected := `<problem xmlns="urn:ietf:rfc:7807"><status>404</status></problem>`
+	if xmlstr != expected {
+		t.Fatalf("unexpected reply: \ngot: %s\nexpected: %s", xmlstr, expected)
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p.Append(problem.Type("https://example.com/404")).WriteXMLTo(w)
+	}))
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	bodyBytes, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	if res.StatusCode != http.StatusNotFound {
+		t.Fatalf("unexpected statuscode: %d expected 404", res.StatusCode)
+	}
+
+	if string(bodyBytes) != `<problem xmlns="urn:ietf:rfc:7807"><status>404</status><type>https://example.com/404</type></problem>` && string(bodyBytes) != `<problem xmlns="urn:ietf:rfc:7807"><type>https://example.com/404</type><status>404</status></problem>` {
+		t.Fatalf("unexpected reply: %s", bodyBytes)
+	}
+}
+
 func TestMarshalUnmarshal(t *testing.T) {
 	p := problem.New(problem.Status(500), problem.Title("Strange"))
 
@@ -75,6 +108,41 @@ func TestMarshalUnmarshal(t *testing.T) {
 	}
 	if p.Error() != newProblem.Error() {
 		t.Fatalf("expected equal problems, got %s - %s", p.Error(), newProblem.Error())
+	}
+}
+
+func TestXMLMarshalUnmarshal(t *testing.T) {
+	p := problem.New(problem.Status(500), problem.Title("StrangeXML"))
+
+	xmlProblem, err := xml.Marshal(&p)
+	if err != nil {
+		t.Fatalf("no error expected in Marshal: %s", err.Error())
+	}
+	if string(xmlProblem) != `<problem xmlns="urn:ietf:rfc:7807"><status>500</status><title>StrangeXML</title></problem>` &&
+		string(xmlProblem) != `<problem xmlns="urn:ietf:rfc:7807"><title>StrangeXML</title><status>500</status></problem>` {
+		t.Fatalf("not expected xml output: %s", string(xmlProblem))
+	}
+
+	newProblem := problem.New()
+	err = xml.Unmarshal(xmlProblem, &newProblem)
+	if err != nil {
+		t.Fatalf("no error expected in Unmarshal: %s", err.Error())
+	}
+
+	if newProblem.JSONString() != `{"status":500,"title":"StrangeXML"}` && newProblem.JSONString() != `{"title":"StrangeXML","status":500}` {
+		t.Fatalf(`Expected {"status":500,"title":"StrangeXML"} got: %s`, newProblem.JSONString())
+	}
+
+	wrongProblem := []byte(`<problem xmlns="unknown"><status>123</status><title>xxx</title></problem>`)
+	err = xml.Unmarshal(wrongProblem, &newProblem)
+	if err == nil {
+		t.Fatalf("Expected an error in Unmarshal")
+	}
+
+	wrongProblem = []byte(`<problem xmlns="urn:ietf:rfc:7807"><status>abc</status><title>StrangeXML</title></problem>`)
+	err = xml.Unmarshal(wrongProblem, &newProblem)
+	if err == nil {
+		t.Fatalf("Expected an error in Unmarshal: status is not an int")
 	}
 }
 

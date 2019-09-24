@@ -3,7 +3,7 @@
 [![GoDoc](https://godoc.org/schneider.vip/problem?status.svg)](https://godoc.org/schneider.vip/problem)
 ![https://github.com/jpoles1/gopherbadger](./coverage_badge.png)
 
-A golang library that implements application/problem+json
+A golang library that implements application/problem+json and application/problem+xml
 
 <img align="right" width="60px" title="houston we have a problem" src="https://raw.githubusercontent.com/egonelbre/gophers/master/.thumb/vector/science/rocket.png">
 
@@ -14,6 +14,7 @@ A golang library that implements application/problem+json
 * RFC link https://tools.ietf.org/html/rfc7807
 * a Problem implements the Error interface and can be compared with errors.Is()
 * Wrap an error to a Problem
+* application/problem+xml is also supported using the xml.Un/Marshaler
 
 ## Install
 

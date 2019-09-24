@@ -2,7 +2,10 @@ package problem
 
 import (
 	"encoding/json"
+	"encoding/xml"
+	"fmt"
 	"net/http"
+	"strconv"
 )
 
 const (
@@ -33,6 +36,12 @@ func (p Problem) JSON() []byte {
 	return b
 }
 
+// XML returns the Problem as json bytes
+func (p Problem) XML() []byte {
+	b, _ := xml.Marshal(p)
+	return b
+}
+
 // UnmarshalJSON implements the json.Unmarshaler interface
 func (p Problem) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, &p.data)
@@ -41,6 +50,58 @@ func (p Problem) UnmarshalJSON(b []byte) error {
 // MarshalJSON implements the json.Marshaler interface
 func (p Problem) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&p.data)
+}
+
+// UnmarshalXML implements the xml.Unmarshaler interface
+func (p *Problem) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	lastElem := ""
+	for {
+		if tok, err := d.Token(); err == nil {
+			switch t := tok.(type) {
+			case xml.StartElement:
+				if t.Name.Space != "urn:ietf:rfc:7807" {
+					return fmt.Errorf("Expected namespace urn:ietf:rfc:7807")
+				}
+				lastElem = t.Name.Local
+			case xml.CharData:
+				if lastElem != "" {
+					if lastElem == "status" {
+						i, err := strconv.Atoi(string(t))
+						if err != nil {
+							return err
+						}
+						p = p.Append(Status(i))
+					} else {
+						p = p.Append(Custom(lastElem, string(t)))
+					}
+				}
+			}
+		} else {
+			break
+		}
+	}
+	return nil
+}
+
+func (p Problem) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	start.Name = xml.Name{Local: "problem"}
+	start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: "xmlns"}, Value: "urn:ietf:rfc:7807"})
+	tokens := []xml.Token{start}
+	for k, v := range p.data {
+		v := fmt.Sprintf("%v", v)
+		t := xml.StartElement{Name: xml.Name{Space: "", Local: k}}
+		tokens = append(tokens, t, xml.CharData(v), xml.EndElement{Name: t.Name})
+	}
+	tokens = append(tokens, xml.EndElement{Name: start.Name})
+	for _, t := range tokens {
+		e.EncodeToken(t)
+	}
+	return e.Flush()
+}
+
+// XMLString returns the Problem as xml
+func (p Problem) XMLString() string {
+	return string(p.XML())
 }
 
 // JSONString returns the Problem as json string
@@ -64,7 +125,7 @@ func (p Problem) Unwrap() error {
 	return p.reason
 }
 
-// WriteTo writes the Problem to a http Response Writer
+// WriteTo writes the JSON Problem to a http Response Writer
 func (p Problem) WriteTo(w http.ResponseWriter) (int, error) {
 	w.Header().Set("Content-Type", ContentTypeJSON)
 	if statuscode, ok := p.data["status"]; ok {
@@ -73,6 +134,17 @@ func (p Problem) WriteTo(w http.ResponseWriter) (int, error) {
 		}
 	}
 	return w.Write(p.JSON())
+}
+
+// WriteXMLTo writes the XML Problem to a http Response Writer
+func (p Problem) WriteXMLTo(w http.ResponseWriter) (int, error) {
+	w.Header().Set("Content-Type", ContentTypeXML)
+	if statuscode, ok := p.data["status"]; ok {
+		if statusint, ok := statuscode.(int); ok {
+			w.WriteHeader(statusint)
+		}
+	}
+	return w.Write(p.XML())
 }
 
 // New generates a new Problem
