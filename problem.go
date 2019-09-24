@@ -83,6 +83,7 @@ func (p *Problem) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	return nil
 }
 
+// MarshalXML implements the xml.Marshaler interface
 func (p Problem) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	start.Name = xml.Name{Local: "problem"}
 	start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: "xmlns"}, Value: "urn:ietf:rfc:7807"})
@@ -125,7 +126,8 @@ func (p Problem) Unwrap() error {
 	return p.reason
 }
 
-// WriteTo writes the JSON Problem to a http Response Writer
+// WriteTo writes the JSON Problem to a http Response Writer using the correct
+// Content-Type and the problem's http statuscode
 func (p Problem) WriteTo(w http.ResponseWriter) (int, error) {
 	w.Header().Set("Content-Type", ContentTypeJSON)
 	if statuscode, ok := p.data["status"]; ok {
@@ -136,7 +138,8 @@ func (p Problem) WriteTo(w http.ResponseWriter) (int, error) {
 	return w.Write(p.JSON())
 }
 
-// WriteXMLTo writes the XML Problem to a http Response Writer
+// WriteXMLTo writes the XML Problem to a http Response Writer using the correct
+// Content-Type and the problem's http statuscode
 func (p Problem) WriteXMLTo(w http.ResponseWriter) (int, error) {
 	w.Header().Set("Content-Type", ContentTypeXML)
 	if statuscode, ok := p.data["status"]; ok {
