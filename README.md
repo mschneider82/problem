@@ -1,6 +1,6 @@
 # problem
 
-[![GoDoc](https://godoc.org/schneider.vip/problem?status.svg)](https://godoc.org/schneider.vip/problem)
+[![PkgGoDev](https://pkg.go.dev/badge/schneider.vip/problem)](https://pkg.go.dev/schneider.vip/problem)
 ![https://github.com/jpoles1/gopherbadger](./coverage_badge.png)
 
 A golang library that implements `application/problem+json` and `application/problem+xml`
