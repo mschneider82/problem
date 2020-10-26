@@ -96,12 +96,12 @@ if err != nil {
 If you are using gin you can simply reply the problem to the client:
 
 ```go
-	func(c *gin.Context) {
-		problem.New(
-			problem.Title("houston! we have a problem"),
-			problem.Status(http.StatusNotFound),
-		).WriteTo(c.Writer)
-	}
+func(c *gin.Context) {
+  problem.New(
+    problem.Title("houston! we have a problem"),
+    problem.Status(http.StatusNotFound),
+  ).WriteTo(c.Writer)
+}
 ```
 
 ### [Echo](https://github.com/labstack/echo) Framework
