@@ -18,7 +18,7 @@ A golang library that implements `application/problem+json` and `application/pro
 
 ## Install
 
-```
+```bash
 go get -u schneider.vip/problem
 ```
 
@@ -37,10 +37,18 @@ Will produce this:
 }
 ```
 
+You can also autofill the title based on the StatusCode:
+
+```go
+problem.Of(404)
+```
+
+Will produce the same problem as above!
+
 You can also append some more options:
 
 ```go
-p := problem.New(problem.Title("Not Found"), problem.Status(404))
+p := problem.Of(http.StatusNotFound)
 p.Append(problem.Detail("some more details"))
 
 // Use the Marshaler interface to get the problem json as []byte
@@ -84,17 +92,16 @@ if err != nil {
 }
 ```
 
-
 ### [Gin](https://github.com/gin-gonic/gin) Framework
 If you are using gin you can simply reply the problem to the client:
 
 ```go
-func(c *gin.Context) {
-  problem.New(
-    problem.Title("houston! we have a problem"),
-    problem.Status(http.StatusNotFound),
-  ).WriteTo(c.Writer)
-}
+	func(c *gin.Context) {
+		problem.New(
+			problem.Title("houston! we have a problem"),
+			problem.Status(http.StatusNotFound),
+		).WriteTo(c.Writer)
+	}
 ```
 
 ### [Echo](https://github.com/labstack/echo) Framework

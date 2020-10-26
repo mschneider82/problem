@@ -160,6 +160,11 @@ func New(opts ...Option) *Problem {
 	return problem
 }
 
+// Of creates a Problem based on StatusCode with Title automatically set
+func Of(statusCode int) *Problem {
+	return New(Status(statusCode), Title(http.StatusText(statusCode)))
+}
+
 // Append an Option to a existing Problem
 func (p *Problem) Append(opts ...Option) *Problem {
 	for _, opt := range opts {

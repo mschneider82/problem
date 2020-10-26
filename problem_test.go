@@ -64,6 +64,11 @@ func TestProblem(t *testing.T) {
 		t.Fatalf("unexpected reply: %s", bodyBytes)
 	}
 
+	p = problem.Of(http.StatusAccepted)
+	str = p.JSONString()
+	if str != `{"status":202,"title":"Accepted"}` {
+		t.Fatalf("unexpected reply: %s", str)
+	}
 }
 
 func TestXMLProblem(t *testing.T) {
@@ -152,7 +157,7 @@ func TestErrors(t *testing.T) {
 	var responseFromExternalService = http.Response{
 		StatusCode: 404,
 		Header: map[string][]string{
-			"Content-Type": []string{"application/problem+json"},
+			"Content-Type": {"application/problem+json"},
 		},
 		Body: ioutil.NopCloser(strings.NewReader(`{"status":404,"title":"Go 1.13 Error"}`)),
 	}
