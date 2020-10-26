@@ -15,6 +15,7 @@ A golang library that implements `application/problem+json` and `application/pro
 * a Problem implements the Error interface and can be compared with errors.Is()
 * Wrap an error to a Problem
 * `application/problem+xml` is also supported using `xml.Unmarshal` and `xml.Marshal`
+* Auto-Title based on StatusCode with `problem.Of(statusCode)`
 
 ## Install
 
