@@ -104,7 +104,7 @@ If you are using echo you can use the following error handler to handle Problems
 func ProblemHandler(err error, c echo.Context) {
   if prb, ok := err.(*problem.Problem); ok {
     if !c.Response().Committed {
-            if _, err := prb.WriteTo(c.Response().Writer); err != nil {
+            if _, err := prb.WriteTo(c.Response()); err != nil {
                     e.Logger.Error(err)
             }
     }
