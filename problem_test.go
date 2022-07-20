@@ -41,11 +41,28 @@ func TestProblem(t *testing.T) {
 		t.Fatalf("unexpected reply: \ngot: %s\nexpected: %s", str, expected)
 	}
 
+	p = problem.Of(http.StatusAccepted)
+	str = p.JSONString()
+	if str != `{"status":202,"title":"Accepted"}` {
+		t.Fatalf("unexpected reply: %s", str)
+	}
+}
+
+func TestProblemHTTP(t *testing.T) {
+	p := problem.New(problem.Title("titlestring"), problem.Status(404), problem.Custom("x", "value"))
+	p.Append(problem.Detail("some more details"), problem.Instance("https://example.com/details"))
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p.Append(problem.Type("https://example.com/404")).WriteTo(w)
+		p.Append(problem.Type("https://example.com/404"))
+		if r.Method == "HEAD" {
+			p.WriteHeaderTo(w)
+		} else {
+			p.WriteTo(w)
+		}
 	}))
 	defer ts.Close()
 
+	// Try GET request
 	res, err := http.Get(ts.URL)
 	if err != nil {
 		t.Fatalf("%v", err)
@@ -59,15 +76,33 @@ func TestProblem(t *testing.T) {
 	if res.StatusCode != http.StatusNotFound {
 		t.Fatalf("unexpected statuscode: %d expected 404", res.StatusCode)
 	}
+	if res.Header.Get("Content-Type") != problem.ContentTypeJSON {
+		t.Fatalf("unexpected ContentType %s", res.Header.Get("Content-Type"))
+	}
 
 	if string(bodyBytes) != `{"detail":"some more details","instance":"https://example.com/details","status":404,"title":"titlestring","type":"https://example.com/404","x":"value"}` {
 		t.Fatalf("unexpected reply: %s", bodyBytes)
 	}
 
-	p = problem.Of(http.StatusAccepted)
-	str = p.JSONString()
-	if str != `{"status":202,"title":"Accepted"}` {
-		t.Fatalf("unexpected reply: %s", str)
+	// Try HEAD request
+	res, err = http.Head(ts.URL)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	bodyBytes, err = ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	if len(bodyBytes) != 0 {
+		t.Fatal("expected empty body")
+	}
+
+	if res.StatusCode != http.StatusNotFound {
+		t.Fatalf("unexpected statuscode: %d expected 404", res.StatusCode)
+	}
+	if res.Header.Get("Content-Type") != problem.ContentTypeJSON {
+		t.Fatalf("unexpected ContentType %s", res.Header.Get("Content-Type"))
 	}
 }
 
@@ -80,10 +115,16 @@ func TestXMLProblem(t *testing.T) {
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p.Append(problem.Type("https://example.com/404")).WriteXMLTo(w)
+		p.Append(problem.Type("https://example.com/404"))
+		if r.Method == "HEAD" {
+			p.WriteXMLHeaderTo(w)
+		} else {
+			p.WriteXMLTo(w)
+		}
 	}))
 	defer ts.Close()
 
+	// Try GET request
 	res, err := http.Get(ts.URL)
 	if err != nil {
 		t.Fatalf("%v", err)
@@ -97,9 +138,33 @@ func TestXMLProblem(t *testing.T) {
 	if res.StatusCode != http.StatusNotFound {
 		t.Fatalf("unexpected statuscode: %d expected 404", res.StatusCode)
 	}
+	if res.Header.Get("Content-Type") != problem.ContentTypeXML {
+		t.Fatalf("unexpected ContentType %s", res.Header.Get("Content-Type"))
+	}
 
 	if string(bodyBytes) != `<problem xmlns="urn:ietf:rfc:7807"><status>404</status><type>https://example.com/404</type></problem>` && string(bodyBytes) != `<problem xmlns="urn:ietf:rfc:7807"><type>https://example.com/404</type><status>404</status></problem>` {
 		t.Fatalf("unexpected reply: %s", bodyBytes)
+	}
+
+	// Try HEAD request
+	res, err = http.Head(ts.URL)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	bodyBytes, err = ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	if len(bodyBytes) != 0 {
+		t.Fatal("expected empty body")
+	}
+
+	if res.StatusCode != http.StatusNotFound {
+		t.Fatalf("unexpected statuscode: %d expected 404", res.StatusCode)
+	}
+	if res.Header.Get("Content-Type") != problem.ContentTypeXML {
+		t.Fatalf("unexpected Content-Type %s", res.Header.Get("Content-Type"))
 	}
 }
 

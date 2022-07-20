@@ -126,27 +126,39 @@ func (p Problem) Unwrap() error {
 	return p.reason
 }
 
-// WriteTo writes the JSON Problem to a http Response Writer using the correct
-// Content-Type and the problem's http statuscode
-func (p Problem) WriteTo(w http.ResponseWriter) (int, error) {
+// WriteHeaderTo writes the HTTP headers for the JSON Problem ContentType and the
+// problem's HTTP statuscode. This is suitable for responding to HEAD requests.
+func (p Problem) WriteHeaderTo(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", ContentTypeJSON)
 	if statuscode, ok := p.data["status"]; ok {
 		if statusint, ok := statuscode.(int); ok {
 			w.WriteHeader(statusint)
 		}
 	}
+}
+
+// WriteTo writes the JSON Problem to an HTTP Response Writer using the correct
+// Content-Type and the problem's HTTP statuscode
+func (p Problem) WriteTo(w http.ResponseWriter) (int, error) {
+	p.WriteHeaderTo(w)
 	return w.Write(p.JSON())
 }
 
-// WriteXMLTo writes the XML Problem to a http Response Writer using the correct
-// Content-Type and the problem's http statuscode
-func (p Problem) WriteXMLTo(w http.ResponseWriter) (int, error) {
+// WriteXMLHeaderTo writes the HTTP headers for the XML Problem ContentType and the
+// problem's HTTP statuscode. This is suitable for responding to HEAD requests.
+func (p Problem) WriteXMLHeaderTo(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", ContentTypeXML)
 	if statuscode, ok := p.data["status"]; ok {
 		if statusint, ok := statuscode.(int); ok {
 			w.WriteHeader(statusint)
 		}
 	}
+}
+
+// WriteXMLTo writes the XML Problem to an HTTP Response Writer using the correct
+// Content-Type and the problem's HTTP statuscode
+func (p Problem) WriteXMLTo(w http.ResponseWriter) (int, error) {
+	p.WriteXMLHeaderTo(w)
 	return w.Write(p.XML())
 }
 
