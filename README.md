@@ -70,11 +70,11 @@ To write the Problem directly to a http.ResponseWriter:
 
 ```go
 http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    problem.New(
-      problem.Type("https://example.com/404"),
-      problem.Status(404)
-    ).WriteTo(w)
-  })
+	problem.New(
+		problem.Type("https://example.com/404"),
+		problem.Status(404),
+	).WriteTo(w)
+})
 ```
 
 Create a Problem from an existing error
@@ -82,14 +82,14 @@ Create a Problem from an existing error
 ```go
 _, err := ioutil.ReadFile("non-existing")
 if err != nil {
-  p := problem.New(
-    problem.Wrap(err),
-    problem.Title("Internal Error"),
-    problem.Status(404),
-    )
-  if !errors.Is(p, os.ErrNotExist) {
-    t.Fatalf("expected not existing error")
-  }
+	p := problem.New(
+		problem.Wrap(err),
+		problem.Title("Internal Error"),
+		problem.Status(404),
+	)
+	if !errors.Is(p, os.ErrNotExist) {
+		t.Fatalf("expected not existing error")
+	}
 }
 ```
 
@@ -98,10 +98,10 @@ If you are using gin you can simply reply the problem to the client:
 
 ```go
 func(c *gin.Context) {
-  problem.New(
-    problem.Title("houston! we have a problem"),
-    problem.Status(http.StatusNotFound),
-  ).WriteTo(c.Writer)
+	problem.New(
+		problem.Title("houston! we have a problem"),
+		problem.Status(http.StatusNotFound),
+	).WriteTo(c.Writer)
 }
 ```
 
@@ -110,15 +110,20 @@ If you are using echo you can use the following error handler to handle Problems
 
 ```go
 func ProblemHandler(err error, c echo.Context) {
-  if prb, ok := err.(*problem.Problem); ok {
-    if !c.Response().Committed {
-            if _, err := prb.WriteTo(c.Response()); err != nil {
-                    e.Logger.Error(err)
-            }
-    }
-  } else {
-        // e is an instance of echo.Echo
-        e.DefaultHTTPErrorHandler(err, c)
-  }
+	if prb, ok := err.(*problem.Problem); ok {
+		if !c.Response().Committed {
+			if c.Request().Method == http.MethodHead {
+				prb.WriteHeaderTo(c.Response())
+			} else if _, err := prb.WriteTo(c.Response()); err != nil {
+				c.Logger().Error(err)
+			}
+		}
+	} else {
+		c.Echo().DefaultHTTPErrorHandler(err, c)
+	}
 }
+
+...
+// e is an instance of echo.Echo
+e.HTTPErrorHandler = ProblemHandler
 ```
