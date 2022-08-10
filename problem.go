@@ -25,6 +25,7 @@ type optionFunc func(*Problem)
 
 func (f optionFunc) apply(problem *Problem) { f(problem) }
 
+// Problem is an RFC7807 error and can be compared with errors.Is()
 type Problem struct {
 	data   map[string]interface{}
 	reason error
