@@ -1,6 +1,5 @@
 # problem
 ![Coverage](https://img.shields.io/badge/Coverage-100.0%25-brightgreen)
-
 [![PkgGoDev](https://pkg.go.dev/badge/schneider.vip/problem)](https://pkg.go.dev/schneider.vip/problem)
 [![Go Report Card](https://goreportcard.com/badge/schneider.vip/problem)](https://goreportcard.com/report/schneider.vip/problem)
 
