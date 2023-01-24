@@ -281,3 +281,21 @@ func TestOsErrorInProblem(t *testing.T) {
 
 	}
 }
+
+func TestTitlef(t *testing.T) {
+	expected := "{\"title\":\"this is a test\"}"
+	toTest := problem.New(problem.Titlef("this is a %s", "test")).JSONString()
+
+	if !strings.Contains(expected, toTest) {
+		t.Fatalf("expected problem %s to match %s", toTest, expected)
+	}
+}
+
+func TestDetailf(t *testing.T) {
+	expected := "{\"detail\":\"this is a test\"}"
+	toTest := problem.New(problem.Detailf("this is a %s", "test")).JSONString()
+
+	if !strings.Contains(expected, toTest) {
+		t.Fatalf("expected problem %s to match %s", toTest, expected)
+	}
+}
