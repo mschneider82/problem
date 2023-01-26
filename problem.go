@@ -246,6 +246,12 @@ func Instance(uri string) Option {
 	})
 }
 
+// Instance an absolute URI using a format string that identifies the specific occurrence of the
+// problem.
+func Instancef(format string, values ...interface{}) Option {
+	return Instance(fmt.Sprintf(format, values...))
+}
+
 // Custom sets a custom key value
 func Custom(key string, value interface{}) Option {
 	return optionFunc(func(problem *Problem) {
