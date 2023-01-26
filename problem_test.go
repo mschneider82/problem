@@ -299,3 +299,12 @@ func TestDetailf(t *testing.T) {
 		t.Fatalf("expected problem %s to match %s", toTest, expected)
 	}
 }
+
+func TestInstancef(t *testing.T) {
+	expected := "{\"instance\":\"this is a test\"}"
+	toTest := problem.New(problem.Instancef("this is a %s", "test")).JSONString()
+
+	if !strings.Contains(expected, toTest) {
+		t.Fatalf("expected problem %s to match %s", toTest, expected)
+	}
+}
