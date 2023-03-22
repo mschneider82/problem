@@ -194,6 +194,15 @@ func Wrap(err error) Option {
 	})
 }
 
+// WrapSilent wraps an error inside of the Problem without placing the wrapped
+// error into the problem's JSON body.  Useful for cases where the underlying
+// error needs to be preserved but not transmitted to the user.
+func WrapSilent(err error) Option {
+	return optionFunc(func(problem *Problem) {
+		problem.reason = err
+	})
+}
+
 // Type sets the type URI (typically, with the "http" or "https" scheme) that identifies the problem type.
 // When dereferenced, it SHOULD provide human-readable documentation for the problem type
 func Type(uri string) Option {
