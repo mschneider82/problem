@@ -253,6 +253,16 @@ func TestNestedErrors(t *testing.T) {
 	if errors.Unwrap(unwrappedProblem) != nil {
 		t.Fatalf("Expected unwrappedProblem has no reason")
 	}
+	// See wrapped error in 'reason'
+	if p.JSONString() != `{"reason":"{\"status\":404,\"title\":\"Root Problem\"}","title":"high level error msg"}` {
+		t.Fatalf("Unexpected contents %s in problem", p.JSONString())
+	}
+
+	p = problem.New(problem.WrapSilent(rootProblem), problem.Title("high level error msg"))
+	// We should not see a "reason" here
+	if p.JSONString() != `{"title":"high level error msg"}` {
+		t.Fatalf("Unexpected contents %s in problem", p.JSONString())
+	}
 }
 
 func TestOsErrorInProblem(t *testing.T) {
